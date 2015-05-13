@@ -4,6 +4,7 @@
 
 // подключаем TMRpcm библиотеку для работы с wav файлами
 #include <TMRpcm.h>
+#include <SPI.h>
 TMRpcm tmrpcm;
 
 // вкл и выкл - красная подсветка
@@ -33,41 +34,6 @@ unsigned long timer = 0;
 // предел счетчика секунд  = 3000 секунд
 #define TIMER_LIMIT 3000
 
-// код асинхронных прерываний
-// код обработки кнопки 1
-void Button1Press()
-{
-  if (button1State == 0)
-	   button1State = 1;
-  else
-  {
-	  tmrpcm.stopPlayback();
-	  button1State == 0;
-  }	  
-}
-// код обработки кнопки 2
-void Button2Press()
-{
-  if (button2State == 0)
-	   button2State = 1;
-  else
-  {
-	  tmrpcm.stopPlayback();
-	  button2State == 0;
-  }	  
-}
-// код обработки кнопки 3
-void Button3Press()
-{
-  if (button3State == 0)
-	   button3State = 1;
-  else
-  {
-	  tmrpcm.stopPlayback();
-	  button3State == 0;
-  }	  
-}
-
 void setup()
 {
 	// настройки пинов кнопок
@@ -78,22 +44,24 @@ void setup()
 	// установить пин динамика для вывода звука
 	tmrpcm.speakerpin = 9;
 	
-	// инициализировать SD карту, если все хорошо то продолжить, иначе все.
-	if (!SD.begin(SD_ChipSelectPin))
-	{
-		return;
-	}
-	
-	// проиграть звук я включился ))
-	//tmrpcm.volume(1);
-	tmrpcm.play("alive.wav");
-	
 	// выключить все светодиоды - сидим не отсвечиваем)
 	RedLed(0);
 	BlueLed(0);
 	
-	// назначаем функции прерываний 	
-	attachInterrupt(0, Button1Press, FALLING);
+	// инициализировать SD карту, если все хорошо то продолжить, иначе все.
+	if (!SD.begin(SD_ChipSelectPin))
+	{
+		RedLed(1);
+		BlueLed(1);
+		return;
+	}
+	
+	// ждать нагрева датчика СО2
+	delay(30000);
+	
+	
+	// проиграть звук я включился ))
+	tmrpcm.play("alive.wav");
 }
 
 void loop()
@@ -128,21 +96,21 @@ void loop()
 				if (button1State == 1)
 				{
 					// проиграть файл зарядки
-					tmrpcm.play("zaryadka1.wav");
+					tmrpcm.play("1.wav");
 					break;
 				}					
 				// ожидание нажатия на кнопку 2
 				if (button2State == 1)
 				{
 					// проиграть файл зарядки
-					tmrpcm.play("zaryadka2.wav");
+					tmrpcm.play("2.wav");
 					break;
 				}	
 				// ожидание нажатия на кнопку 3
 				if (button3State == 1)
 				{
 					// проиграть файл зарядки
-					tmrpcm.play("zaryadka3.wav");
+					tmrpcm.play("3.wav");
 					break;
 				}					
 			}
@@ -150,4 +118,9 @@ void loop()
 		else
 			timer++;
 	}
+}
+
+void RedLed(int state)
+{
+	
 }
